@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Table(name = "USER_TABLE")
@@ -23,6 +24,7 @@ public class User {
     private String ownerEmail;
     private String phone;
     private String password;
+
 
 
 }

@@ -3,11 +3,17 @@ package com.daniel.propertymanagment.service;
 import com.daniel.propertymanagment.converter.PropertyConverter;
 import com.daniel.propertymanagment.dto.PropertyDTO;
 import com.daniel.propertymanagment.entity.Property;
+import com.daniel.propertymanagment.entity.User;
+import com.daniel.propertymanagment.exception.BusinessException;
+import com.daniel.propertymanagment.exception.ErrorModel;
+import com.daniel.propertymanagment.repository.AddresRepository;
 import com.daniel.propertymanagment.repository.PropertyRepository;
+import com.daniel.propertymanagment.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,19 +26,41 @@ public class PropertyServiceImpl implements PropertyService {
     @Autowired
     private PropertyConverter propertyConverter;
 
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private AddresRepository addresRepository;
+
     @Override
-    public PropertyDTO saveProperty(PropertyDTO propertyDTO) {
+    public PropertyDTO saveProperty(PropertyDTO propertyDTO) throws BusinessException {
 
-        Property property = propertyConverter.convertDTOtoEntity(propertyDTO);
-        Property propertyResponse = propertyRepository.save(property);
+        Optional<User> user = userRepository.findById(propertyDTO.getUserId());
+        if(user.isPresent()){
+            Property property = propertyConverter.convertDTOtoEntity(propertyDTO);
+            property.setUser(user.get());
+            Property propertyResponse = propertyRepository.save(property);
+            return propertyConverter.convertEntityToDTO(propertyResponse);
+        }
 
-        return propertyConverter.convertEntityToDTO(propertyResponse);
+        List<ErrorModel> errorModels = new ArrayList<>();
+        ErrorModel errorModel = new ErrorModel();
+        errorModel.setCode("INVALID_USER_ID");
+        errorModel.setMessage("User dont exist");
+        errorModels.add(errorModel);
+
+        throw new BusinessException(errorModels);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<Property> getAllProperties() {
         return (List<Property>) propertyRepository.findAll();
+    }
+
+    @Override
+    public List<Property> getAllPropertiesByUser(Long id) {
+        return propertyRepository.findAllByUserId(id);
     }
 
     @Override

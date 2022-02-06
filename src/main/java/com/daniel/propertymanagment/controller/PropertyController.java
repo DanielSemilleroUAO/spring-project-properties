@@ -2,6 +2,7 @@ package com.daniel.propertymanagment.controller;
 
 import com.daniel.propertymanagment.dto.PropertyDTO;
 import com.daniel.propertymanagment.entity.Property;
+import com.daniel.propertymanagment.exception.BusinessException;
 import com.daniel.propertymanagment.service.PropertyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,7 +26,7 @@ public class PropertyController {
     }
 
     @PostMapping("/properties")
-    public ResponseEntity<PropertyDTO> saveProperty(@RequestBody PropertyDTO propertyDTO){
+    public ResponseEntity<PropertyDTO> saveProperty(@RequestBody PropertyDTO propertyDTO) throws BusinessException {
         System.out.println(propertyDTO.toString());
         PropertyDTO propertyResponse = propertyService.saveProperty(propertyDTO);
         return new ResponseEntity(propertyResponse, HttpStatus.CREATED);
@@ -35,6 +36,11 @@ public class PropertyController {
     public ResponseEntity<?> getAllProperties(){
         System.out.println(dummy);
         return new ResponseEntity(propertyService.getAllProperties(), HttpStatus.OK);
+    }
+
+    @GetMapping("/properties/users/{id}")
+    public ResponseEntity<?> getAllPropertiesByUser(@PathVariable Long id){
+        return new ResponseEntity(propertyService.getAllPropertiesByUser(id), HttpStatus.OK);
     }
 
     @PutMapping("/properties/{id}")
